@@ -1,0 +1,24 @@
+import nltk
+import re
+text1 = []
+with open('text',mode='r') as file:
+    text1 = file.read()
+#print(text1)
+def remove_string_special_characters(s):
+    # removes special characters with ' '
+    stripped = re.sub('[^A-Za-z0-9]+', '', s)
+    stripped = re.sub('_', '', stripped)
+    # Change any white space to one space
+    stripped = re.sub('\s+', ' ', stripped)
+    # Remove start and end white spaces
+    stripped = stripped.strip()
+    if stripped != '':
+        return stripped.lower()
+tokens = nltk.word_tokenize(text1)
+#print(tokens)
+tag = nltk.pos_tag(tokens)
+print(tag)
+grammar = "NP: {<DT>?<JJ>*<NN>}"
+cp=nltk.RegexpParser(grammar)
+result = cp.parse(tag)
+print(result)
