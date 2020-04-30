@@ -1,0 +1,132 @@
+import urllib.request
+from bs4 import BeautifulSoup
+import nltk
+import re
+import math
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+try:
+    from googlesearch import search
+except ImportError:
+    print("No module named 'google' found")
+# to search
+query = "tutorial on datastructure"
+url=[]
+for j in search(query, tld="co.in", num=10, stop=1, pause=2):
+    print(j)
+    url.append(j)
+html = urllib.request.urlopen(url[0]).read()
+soup = BeautifulSoup(html,features="lxml")
+# kill all script and style elements
+for script in soup(["script", "style"]):
+    script.extract()
+# get text
+text = soup.get_text()
+# break into lines and remove leading and trailing space on each
+lines = (line.strip() for line in text.splitlines())
+# break multi-headlines into a line each
+chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
+# drop blank lines
+text = '\n'.join(chunk for chunk in chunks if chunk)
+#print(text)
+def remove_string_special_characters(s):
+    # removes special characters with ' '
+    stripped = re.sub('[^a-zA-z\s]', '', s)
+    stripped = re.sub('_', '', stripped)
+
+    # Change any white space to one space
+    stripped = re.sub('\s+', ' ', stripped)
+
+    # Remove start and end white spaces
+    stripped = stripped.strip()
+    return stripped.lower()
+text= remove_string_special_characters(text)  # removing special character
+
+# Stopword removal
+stop_words = set(stopwords.words('english'))
+tokens = nltk.word_tokenize(text)
+f_tokens = [w for w in tokens if not w in stop_words]
+f_tokens=[]
+
+for w in tokens:
+    if w not in stop_words:
+        f_tokens.append(w)
+
+
+def get_doc(sent):
+    doc_info=[]
+    i=0
+    for sent in text_clean:
+        i+=1
+        count=count_word(sent)
+        temp= {'doc_id':i,'doc_length':count}
+        doc_info.append(temp)
+    return doc_info
+
+
+def count_word(sent):
+    count=0
+    for word in f_tokens:
+        count +=1
+    return count
+
+def create_freq_word(sent):
+    i=0
+    freq_list=[]
+    for sent in sent:
+        i+=1
+        freq_dict={}
+        word=word_tokenize(sent)
+        for word in tokens:
+            word=word.lower()
+            if word in freq_dict:
+                freq_dict[word]+=1
+            else:
+                freq_dict[word]=1
+            temp= { 'doc_id':i,'freq_dict':freq_dict}
+        freq_list.append(temp)
+    return freq_list
+
+def compute_TF(doc_info,freq_list):
+    TF_score=[]
+    for tempdict in freq_list:
+        id=tempdict['doc_id']
+        for k in tempdict['freq_dict']:
+            temp={'doc_id':id,
+                  'TF_score': round(tempdict['freq_dict'][k]/doc_info[id-1]['doc_length'],5),'key': k}
+            TF_score.append(temp)
+    return TF_score
+
+def compute_IDF(doc_info,freq_list):
+    IDF_scores=[]
+    counters=0
+    for dict in freq_list:
+        counters+=1
+        for k in dict['freq_dict'].keys():
+            count= sum([k in tempdict['freq_dict'] for tempdict in freq_list])
+            temp={'doc_id':counters,'IDF_scores': round(math.log(len(doc_info)/count),5),'key' :k}
+            IDF_scores.append(temp)
+    return IDF_scores
+
+def computeTFIDF(TF_score,IDF_score):
+    TFIDF_score=[]
+    for j in IDF_score:
+        for i in TF_score:
+            if j['key']== i['key'] and j['doc_id']==i['doc_id']:
+                temp={'doc_id':j['doc_id'],
+                      'TFIDF_score': j['IDF_score']*i['TF_score'],
+                      'key' : i['key']}
+        TFIDF_score.append(temp)
+    return TFIDF_score
+
+text_clean=[remove_string_special_characters(s) for s in f_tokens]
+doc_info=get_doc(text_clean)
+freq_word=create_freq_word(text_clean)
+TF_score=compute_TF(doc_info,freq_word)
+IDF_score=compute_IDF(doc_info,freq_word)
+#print(doc_info,'\n')
+#print(IDF_score,'\n')
+#a=sorted(TF_score.items(), key=lambda x: x[1], reverse=True)
+#print(a,'\n')
+print(TF_score)
+print(IDF_score)
