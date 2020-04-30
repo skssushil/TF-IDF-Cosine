@@ -1,0 +1,37 @@
+import nltk
+import re
+from nltk import bigrams
+text1 = []
+with open('text',mode='r') as file:
+    text1 = file.read()
+#print(text1)
+def remove_string_special_characters(s):
+    # removes special characters with ' '
+    stripped = re.sub('[^a-zA-z\s]', '', s)
+    stripped = re.sub('_', '', stripped)
+    stripped = re.sub(r"[-()\"#/@;:<>{}`+=~|.!?,]", "", s)
+    # Change any white space to one space
+    stripped = re.sub('\s+', ' ', stripped)
+    # Remove start and end white spaces
+    stripped = stripped.strip()
+    if stripped != '':
+        return stripped.lower()
+text1=remove_string_special_characters(text1)
+tokens = nltk.word_tokenize(text1)
+bigram=list(bigrams(tokens))
+#print(bigram)
+bi_count={}
+for token in bigram:
+    if token not in bi_count:
+        bi_count[token] = 1
+    else:
+        bi_count[token] += 1
+#print(bi_count)
+a=sorted(bi_count.items(), key=lambda x: x[1], reverse=True)
+count=len(bi_count)
+print("Total no of bi gram is ",count)
+p={}
+for i in range(count):
+    p[i]=(a[i][1])/count
+for i in range(10):
+    print(a[i],"Probability of occurrence of Bigram",round(p[i],5))
