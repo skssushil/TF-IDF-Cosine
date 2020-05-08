@@ -1,0 +1,17 @@
+import re
+import requests
+url = 'http://www.jnu.ac.in/iha_admin'
+s = 'Hello from shubhamg199630@gmail.com to priya91@yahoo.com abou dsn,nsdkkjnsk  kdsnklmlsdksd ksknsk t the meeting @2PM +918286454652 +916446464655 sjkhsidhi@fjid.com +91 593256252 njhj 04/03/1994'
+def get_doc(url):
+    raw = requests.get(url).text
+    return raw
+data = get_doc(url)
+the_url = 'http://www.jnu.ac.in/iha_admin'
+list1=re.findall(r"[\w.]+@[\w.]+",data)
+mob_num = re.compile(r'(\+91)([0-9]{10})')   #(r'\+[-()\s\d]+?(?=\s*[+<]) re.compile(r'^PY\s+(\d{4})', re.M)
+list2=re.findall(mob_num,s)
+find_date=re.compile(r'(\d{2}).(\d{2}).(\d{4})')
+list3 = re.findall(find_date, data)
+print(list1)
+print(list2)
+print(list3)
